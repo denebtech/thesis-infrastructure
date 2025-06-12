@@ -4,12 +4,11 @@ Terraform module to create an S3 bucket specifically designed for storing Terraf
 
 ## Features
 
-- **S3 bucket for Terraform state storage** with configurable naming prefix
+- **S3 bucket for Terraform state storage** with configurable bucket prefix
 - **Versioning enabled** for state file history and rollback capabilities
 - **Object Lock enabled** for additional protection against accidental deletion or modification, granting immutability
-- **Server-side encryption** with AWS KMS using S3 managed keys
+- **Server-side encryption** with AWS KMS using AWS S3 managed keys
 - **Public access blocked** for enhanced security
-- **Private ACL** to prevent unauthorized access
 - **Lifecycle management** with intelligent tiering and cleanup policies
 - **Compliance checks** with Checkov security scanning rules
 - **Force destroy option** for development environments
@@ -69,7 +68,6 @@ module "tf_state_bucket_dev" {
 | [aws_s3_bucket.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_versioning.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
-| [aws_s3_bucket_acl.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
 | [aws_s3_bucket_public_access_block.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_lifecycle_configuration.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
 
@@ -77,7 +75,7 @@ module "tf_state_bucket_dev" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | The name of the S3 bucket to store Terraform state. | `string` | n/a | yes |
+| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | The name prefix for the S3 bucket to store Terraform state. AWS will append a unique suffix. | `string` | n/a | yes |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Enable force destroy of the S3 bucket, allowing deletion even if it contains objects. | `bool` | `false` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to the S3 bucket. | `map(string)` | `{}` | no |
 
@@ -95,7 +93,7 @@ This module implements comprehensive security best practices:
 ### Encryption
 
 - **Server-side encryption** enabled with AWS KMS
-- Uses AWS S3 managed encryption keys (`aws:s3`)
+- Uses AWS S3 managed encryption keys for KMS encryption
 
 ### Versioning
 
@@ -109,11 +107,19 @@ This module implements comprehensive security best practices:
 - Provides additional layer of protection for critical Terraform state files
 - Complements versioning by ensuring immutability of stored state versions
 
+### Public Access Protection
+
+- **Complete public access blocking** enabled:
+  - Block public ACLs
+  - Block public bucket policies
+  - Ignore public ACLs
+  - Restrict public buckets
+
 ### Lifecycle Management
 
 - **Intelligent tiering** to optimize storage costs:
-  - Objects transition to Standard-IA after 30 days
-  - Objects transition to Glacier after 60 days
+  - Non-current versions transition to Standard-IA after 30 days
+  - Non-current versions transition to Glacier after 60 days
   - Non-current versions expire after 120 days
 - **Incomplete multipart upload cleanup** after 7 days
 
@@ -127,11 +133,17 @@ This module includes Checkov security compliance checks with appropriate skips f
 
 ## Best Practices
 
-1. **Unique naming**: The module uses `bucket_prefix` to ensure unique bucket names
+1. **Unique naming**: The module uses `bucket_prefix` to ensure unique bucket names (AWS appends a unique suffix)
 2. **Tagging**: Always include relevant tags for resource management
-4. **Force destroy**: Only enable in development environments for easy cleanup
-5. **Object Lock**: Provides immutable storage for critical state files, preventing accidental deletion
-6. **State file protection**: The combination of versioning and object lock ensures comprehensive protection
+3. **Force destroy**: Only enable in development environments for easy cleanup
+4. **Object Lock**: Provides immutable storage for critical state files, preventing accidental deletion
+5. **State file protection**: The combination of versioning and object lock ensures comprehensive protection
+
+## Important Notes
+
+- The `bucket_name` variable is used as a prefix. AWS will automatically append a unique suffix to ensure global uniqueness
+- Object Lock is enabled by default, providing immutable storage for Terraform state files
+- The module automatically adds `ManagedBy = "Terraform"` and `Purpose = "Terraform State Storage"` tags
 
 ## Contributing
 

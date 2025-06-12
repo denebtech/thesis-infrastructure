@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "terraform_state" {
     var.tags,
     {
       ManagedBy = "Terraform"
-      Porpose   = "Terraform State Storage"
+      Purpose   = "Terraform State Storage"
     }
   )
 }
@@ -35,11 +35,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" 
   }
 }
 
-resource "aws_s3_bucket_acl" "terraform_state" {
-  bucket = aws_s3_bucket.terraform_state.id
-  acl    = "private"
-}
-
 resource "aws_s3_bucket_public_access_block" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -56,7 +51,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
     id     = "terraform_state_lifecycle_rule"
     status = "Enabled"
 
-    filter {}
+    filter {
+      prefix = ""
+    }
 
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
