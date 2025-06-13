@@ -2,6 +2,8 @@ locals {
   notification_topics = var.enable_notifications ? var.notification_topics : {}
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_s3_bucket" "bucket" {
   #checkov:skip=CKV_AWS_18: Bucket access logging is not required.
   #checkov:skip=CKV_AWS_144: Bucket cross-region replication is not required.
@@ -32,6 +34,9 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
     Statement = [
       {
         Effect = "Allow"
+        Principal = {
+          AWS = data.aws_caller_identity.current.account_id
+        }
         Action = [
           "s3:GetObject",
           "s3:PutObject",
@@ -49,6 +54,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
+
+    filter {
+      prefix = ""
+    }
 
     noncurrent_version_expiration {
       noncurrent_days = 120
@@ -100,7 +109,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.bucket.id
 
   topic {
-    topic_arn     = aws_sns_topic.bucket_notifications.arn
+    topic_arn     = aws_sns_topic.bucket_notifications[0].arn
     events        = each.value.events
     filter_prefix = each.value.filter_prefix
     filter_suffix = each.value.filter_suffix

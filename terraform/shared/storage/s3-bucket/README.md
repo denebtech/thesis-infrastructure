@@ -9,7 +9,9 @@ This Terraform module creates a secure and configurable AWS S3 bucket with best 
 - ✅ **Public access blocked** - Blocks all public access by default for security
 - ✅ **Lifecycle management** - Automatically expires old versions after 120 days
 - ✅ **SNS notifications** - Optional S3 event notifications via SNS
+- ✅ **Bucket policy** - Configurable bucket policy for access control
 - ✅ **Tagging support** - Flexible tagging with automatic management tags
+- ✅ **Compliance checks** - Includes Checkov security scanning rule skips
 
 ## Usage
 
@@ -62,14 +64,14 @@ module "my_bucket_with_notifications" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.0.0 |
-| aws | ~> 5.90.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.90.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | ~> 5.90.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.90.0 |
 
 ## Resources
 
@@ -88,34 +90,85 @@ module "my_bucket_with_notifications" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| bucket_name | The name of the S3 bucket to create. | `string` | n/a | yes |
-| environment | The environment for which the S3 bucket is being created (e.g., dev, staging, production). | `string` | n/a | yes |
-| tags | A map of tags to assign to the S3 bucket. | `map(string)` | `{}` | no |
-| enable_notifications | Whether to enable S3 bucket notifications. | `bool` | `false` | no |
-| notification_topics | A list of notification topics to configure for the S3 bucket. | <pre>map(object({<br>  id            = optional(string, "")<br>  events        = list(string)<br>  filter_prefix = optional(string, null)<br>  filter_suffix = optional(string, null)<br>}))</pre> | `null` | no |
+| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | The name of the S3 bucket to create. | `string` | n/a | yes |
+| <a name="input_environment"></a> [environment](#input\_environment) | The environment for which the S3 bucket is being created (e.g., dev, staging, production). | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to the S3 bucket. | `map(string)` | `{}` | no |
+| <a name="input_enable_notifications"></a> [enable\_notifications](#input\_enable\_notifications) | Whether to enable S3 bucket notifications. | `bool` | `false` | no |
+| <a name="input_notification_topics"></a> [notification\_topics](#input\_notification\_topics) | A map of notification topics to configure for the S3 bucket. | <pre>map(object({<br>  id            = optional(string, "")<br>  events        = list(string)<br>  filter_prefix = optional(string, "")<br>  filter_suffix = optional(string, "")<br>}))</pre> | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| bucket_name | The name of the S3 bucket created. |
-| bucket_arn | The ARN of the S3 bucket created. |
+| <a name="output_bucket_name"></a> [bucket\_name](#output\_bucket\_name) | The name of the S3 bucket created. |
+| <a name="output_bucket_arn"></a> [bucket\_arn](#output\_bucket\_arn) | The ARN of the S3 bucket created. |
 
-## Security Considerations
+## Security Features
 
-This module implements several security best practices:
+This module implements comprehensive security best practices:
 
-1. **Public Access Blocked**: All public access is blocked by default
-2. **Encryption**: Server-side encryption is enabled using AWS KMS
-3. **Bucket Policy**: Restrictive bucket policy allowing only specific actions
-4. **Versioning**: Object versioning is enabled for data protection
+### Encryption
 
-## Lifecycle Management
+- **Server-side encryption** enabled with AWS KMS
+- Uses AWS S3 managed encryption keys for KMS encryption
 
-The module automatically configures lifecycle rules to:
-- Expire non-current object versions after 120 days
-- This helps manage storage costs by cleaning up old versions
+### Versioning
+
+- **Versioning enabled** to maintain history of objects
+- Protects against accidental data corruption or deletion
+
+### Public Access Protection
+
+- **Complete public access blocking** enabled:
+
+  - Block public ACLs
+  - Block public bucket policies
+  - Ignore public ACLs
+  - Restrict public buckets
+
+### Bucket Policy
+
+- **Configurable bucket policy** that allows:
+
+  - `s3:GetObject` - Read access to objects
+  - `s3:PutObject` - Write access to objects
+  - `s3:DeleteObject` - Delete access to objects
+
+- Policy is applied to all objects in the bucket (`/*`)
+
+### Lifecycle Management
+
+- **Automatic cleanup** of non-current object versions:
+  - Non-current versions expire after 120 days
+- **Incomplete multipart upload cleanup** after 7 days
+- Helps manage storage costs by cleaning up old data
+
+## Compliance
+
+This module includes Checkov security compliance checks with appropriate skips for non-applicable rules:
+
+- `CKV_AWS_18`: Bucket access logging skipped (not required for general-purpose buckets)
+- `CKV_AWS_144`: Cross-region replication skipped (not required)
+
+## Best Practices
+
+1. **Unique naming**: The module uses `bucket_prefix` to ensure unique bucket names (AWS appends a unique suffix)
+2. **Environment tagging**: Always specify the environment for proper resource management
+3. **Lifecycle management**: Automatic cleanup of old versions helps control storage costs
+4. **Security defaults**: All security features are enabled by default
+5. **Notification filtering**: Use prefix/suffix filters to avoid unnecessary notifications
+
+## Important Notes
+
+- The `bucket_name` variable is used as a prefix. AWS will automatically append a unique suffix to ensure global uniqueness
+- SNS notifications require `enable_notifications = true` and at least one entry in `notification_topics`
+- The module automatically adds `ManagedBy = "Terraform"` and `Environment = {var.environment}` tags
+- Bucket policy allows basic read/write/delete operations - modify as needed for specific use cases
+
+## Contributing
+
+This module is part of the [thesis-infrastructure](../../../README.md) project. Please follow the project's contribution guidelines and ensure all pre-commit hooks pass before submitting changes.
 
 ## License
 
-This module is part of the thesis infrastructure project.
+This project is licensed under the MIT License - see the [LICENSE](../../../LICENSE) file for details.

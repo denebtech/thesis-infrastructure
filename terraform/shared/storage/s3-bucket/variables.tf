@@ -22,12 +22,11 @@ variable "enable_notifications" {
 
 variable "notification_topics" {
   description = "A list of notification topics to configure for the S3 bucket."
-  type = optional(
-    map(object({
-      id            = optional(string, "")
-      events        = list(string)
-      filter_prefix = optional(string, null)
-      filter_suffix = optional(string, null)
-    }))
-  )
+  type = map(object({
+    id            = optional(string, "")
+    events        = list(string)
+    filter_prefix = optional(string, "")
+    filter_suffix = optional(string, "")
+  }))
+  default = {}
 }
