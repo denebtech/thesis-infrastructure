@@ -15,6 +15,21 @@ inputs = {
   bucket_name = "datalake-production-bucket"
   environment = "production"
 
+  enable_notifications = true
+  notification_topics = {
+    "profiling-report" = {
+      id            = "profiling-report-notification"
+      events        = ["s3:ObjectCreated:*"]
+      filter_prefix = "profiling-report/"
+    }
+  }
+  notification_subscriptions = {
+    "email" = {
+      protocol = "email"
+      endpoint = "jairo@denebtech.com.ar"
+    }
+  }
+
   tags = merge(
     include.root.locals.common_tags,
     {

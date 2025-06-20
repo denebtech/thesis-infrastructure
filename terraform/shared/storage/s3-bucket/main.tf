@@ -83,8 +83,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
-      kms_master_key_id = "aws:s3"
+      sse_algorithm = "AES256"
     }
   }
 }
@@ -92,7 +91,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption
 resource "aws_sns_topic" "bucket_notifications" {
   count = var.enable_notifications ? 1 : 0
 
-  name = "${var.bucket_name}-notifications"
+  name   = "${var.bucket_name}-notifications"
+  policy = data.aws_iam_policy_document.topic.json
 
   tags = merge(
     var.tags,
@@ -103,8 +103,16 @@ resource "aws_sns_topic" "bucket_notifications" {
   )
 }
 
+resource "aws_sns_topic_subscription" "bucket_notification_subscription" {
+  for_each = var.enable_notifications ? var.notification_subscriptions : {}
+
+  topic_arn = aws_sns_topic.bucket_notifications[0].arn
+  protocol  = each.value.protocol
+  endpoint  = each.value.endpoint
+}
+
 resource "aws_s3_bucket_notification" "bucket_notification" {
-  for_each = local.notification_topics
+  for_each = var.enable_notifications ? local.notification_topics : {}
 
   bucket = aws_s3_bucket.bucket.id
 

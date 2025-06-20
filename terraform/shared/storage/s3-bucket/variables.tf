@@ -30,3 +30,12 @@ variable "notification_topics" {
   }))
   default = {}
 }
+
+variable "notification_subscriptions" {
+  description = "A list of notification subscriptions for the S3 bucket."
+  type = map(object({
+    protocol = optional(string, "email")
+    endpoint = string
+  }))
+  default = {}
+}
