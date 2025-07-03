@@ -23,5 +23,10 @@ inputs = {
       members = ["pablo.ramos@thesis.io"]
       policy  = file("${get_terragrunt_dir()}/researchers.json")
     }
+    "application" = {
+      path    = "/application/"
+      members = ["app@thesis.io"]
+      policy  = file("${get_terragrunt_dir()}/application.json")
+    }
   }
 }

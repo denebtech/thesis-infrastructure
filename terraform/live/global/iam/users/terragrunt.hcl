@@ -13,7 +13,8 @@ include "global" {
 
 inputs = {
   users = [
-    "pablo.ramos@thesis.io"
+    "pablo.ramos@thesis.io",
+    "app@thesis.io",
   ]
   path = "/users/"
   tags = include.root.locals.common_tags
