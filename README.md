@@ -54,10 +54,22 @@ poetry run pre-commit install
 
 ### 4. Configure Cloud Provider Authentication
 
-Configure your cloud provider credentials (example for AWS):
+Configure your cloud provider credentials:
+
+- Amazon Web Services
 
 ```bash
-aws configure
+aws configure --profile thesis-profile
+# or
+export AWS_ACCESS_KEY_ID="your-access-key"
+export AWS_SECRET_ACCESS_KEY="your-secret-key"
+export AWS_DEFAULT_REGION="us-east-1"
+```
+
+- Alibaba Cloud
+
+```bash
+aliyun configure --profile thesis-profile
 # or
 export AWS_ACCESS_KEY_ID="your-access-key"
 export AWS_SECRET_ACCESS_KEY="your-secret-key"
@@ -120,3 +132,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 For questions or issues related to this infrastructure setup, please create an issue in the repository or contact the author.
+
+## References
+
+- [Terraform Backend OSS](https://developer.hashicorp.com/terraform/language/backend/oss)
+- [Configuring environment variables for the AWS CLI](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html)
