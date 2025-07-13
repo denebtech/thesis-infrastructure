@@ -71,9 +71,9 @@ export AWS_DEFAULT_REGION="us-east-1"
 ```bash
 aliyun configure --profile thesis-profile
 # or
-export AWS_ACCESS_KEY_ID="your-access-key"
-export AWS_SECRET_ACCESS_KEY="your-secret-key"
-export AWS_DEFAULT_REGION="us-east-1"
+export ALICLOUD_ACCESS_KEY="your-access-key"
+export ALICLOUD_SECRET_KEY="your-secret-key"
+export ALICLOUD_REGION="us-east-1"
 ```
 
 ## Development Workflow
