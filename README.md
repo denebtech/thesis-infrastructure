@@ -76,6 +76,12 @@ export ALICLOUD_SECRET_KEY="your-secret-key"
 export ALICLOUD_REGION="us-east-1"
 ```
 
+- Digital Ocean
+
+```bash
+export DIGITALOCEAN_ACCESS_TOKEN="digital-ocean-token"
+```
+
 ## Development Workflow
 
 ### 1. Making Changes
@@ -137,3 +143,4 @@ For questions or issues related to this infrastructure setup, please create an i
 
 - [Terraform Backend OSS](https://developer.hashicorp.com/terraform/language/backend/oss)
 - [Configuring environment variables for the AWS CLI](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html)
+- [Terraform Digital Ocean Provider](https://registry.terraform.io/providers/digitalocean/digitalocean/latest/docs)
